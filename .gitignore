@@ -49,6 +49,7 @@ logs
 .history/
 tmp/
 temp/
+scripts/
 
 # Test files
 /coverage
