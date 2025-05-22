@@ -1,0 +1,53 @@
+{
+  "name": "aspen-cli",
+  "version": "0.1.0",
+  "description": "A modern CLI tool for creating backend projects with customizable options",
+  "main": "dist/index.js",
+  "bin": {
+    "aspen": "dist/index.js"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "lint": "eslint src --ext .ts",
+    "prepublishOnly": "npm run build",
+    "aspen": "node dist/index.js",
+    "publish-package": "./scripts/publish.sh",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "cli",
+    "scaffold",
+    "backend",
+    "generator",
+    "project",
+    "template"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/ejs": "^3.1.5",
+    "@types/fs-extra": "^11.0.4",
+    "@types/gradient-string": "^1.1.6",
+    "@types/inquirer": "^9.0.8",
+    "@types/listr": "^0.14.9",
+    "@types/node": "^22.15.21",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "eslint": "^9.27.0",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "commander": "^14.0.0",
+    "ejs": "^3.1.10",
+    "execa": "^9.5.3",
+    "fs-extra": "^11.3.0",
+    "gradient-string": "^3.0.0",
+    "inquirer": "^12.6.1",
+    "listr": "^0.14.3",
+    "ora": "^8.2.0"
+  }
+}

@@ -1,0 +1,58 @@
+## Frameworks Suportados
+
+Aspen permite criar projetos usando diversos frameworks populares:
+
+- **Express**: Framework web minimalista e flexível para Node.js
+- **Fastify**: Framework web rápido e com baixo overhead
+- **NestJS**: Framework progressivo para construir aplicações server-side eficientes e escaláveis
+- **Hono**: Framework web ultrarrápido, projetado para Edge Computing
+- **AdonisJS**: Framework completo com foco em ergonomia do desenvolvedor
+
+## ORMs e Bancos de Dados
+
+Escolha entre vários ORMs e bancos de dados:
+
+### ORMs Suportados
+
+- **Prisma**: ORM de próxima geração para Node.js e TypeScript
+- **TypeORM**: ORM para TypeScript e JavaScript
+- **Mongoose**: Modelagem de objetos MongoDB para Node.js
+- **Drizzle**: ORM TypeScript para Node.js
+- **Sequelize**: ORM baseado em promessas para Node.js
+- **Lucid**: ORM integrado do AdonisJS
+
+### Bancos de Dados Suportados
+
+- **PostgreSQL**: Sistema de banco de dados relacional poderoso e de código aberto
+- **MySQL**: Sistema de gerenciamento de banco de dados relacional
+- **SQLite**: Biblioteca que implementa um mecanismo SQL autônomo
+- **MongoDB**: Banco de dados NoSQL orientado a documentos
+
+## Recursos Adicionais
+
+O Aspen permite adicionar várias funcionalidades ao seu projeto:
+
+- **ESLint**: Linting para JavaScript e TypeScript
+- **Prettier**: Formatação de código consistente
+- **Biome**: Ferramentas de qualidade de código
+- **Jest**: Framework de testes JavaScript
+- **Swagger/OpenAPI**: Documentação de API
+- **Docker**: Containerização do projeto
+- **Winston**: Logging avançado
+- **JWT**: Autenticação baseada em tokens
+- **Helmet**: Segurança para cabeçalhos HTTP
+- **Rate Limiting**: Proteção contra abuso de API
+
+## Contribuição
+
+Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar pull requests.
+
+1. Faça um fork do projeto
+2. Crie sua branch de recurso (`git checkout -b feature/amazing-feature`)
+3. Commit suas alterações (`git commit -m 'Add some amazing feature'`)
+4. Push para a branch (`git push origin feature/amazing-feature`)
+5. Abra um Pull Request
+
+## Licença
+
+Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
