@@ -20,10 +20,10 @@ Aspen é uma ferramenta de linha de comando moderna para criar projetos backend 
 
 ```bash
 # Instalação global via npm
-npm install -g aspen-cli
+npm install -g cli-aspen
 
 # Ou via yarn
-yarn global add aspen-cli
+yarn global add cli-aspen
 
 # Ou via pnpm
 pnpm add -g aspen-cli
