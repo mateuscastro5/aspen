@@ -13,7 +13,16 @@ import {
 import { frameworkCommands, addORM, addFeatures, createProjectFromTemplate } from '../utils/frameworks.js';
 import { ProjectOptions } from '../types/index.js';
 
-export const createProject = async (name?: string, options?: { directory?: string, template?: string }) => {
+export const createProject = async (name?: string, options?: { 
+  directory?: string, 
+  template?: string, 
+  framework?: string, 
+  orm?: string, 
+  database?: string,
+  features?: string,
+  packageManager?: string,
+  yes?: boolean
+}) => {
   let projectName = name || '';
   if (!projectName) {
     const answers = await inquirer.prompt([

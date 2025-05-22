@@ -1,5 +1,5 @@
 {
-  "name": "aspen-cli",
+  "name": "aspen-backend-cli",
   "version": "0.1.0",
   "description": "A modern CLI tool for creating backend projects with customizable options",
   "main": "dist/index.js",
@@ -12,10 +12,12 @@
     "dev": "tsc --watch",
     "start": "node dist/index.js",
     "lint": "eslint src --ext .ts",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run build && chmod +x dist/index.js",
     "aspen": "node dist/index.js",
     "publish-package": "./scripts/publish.sh",
-    "test": "echo \"No tests specified\" && exit 0"
+    "publish-npm": "./scripts/npm-publish.sh",
+    "test": "echo \"No tests specified\" && exit 0",
+    "install-global": "./install-global.sh"
   },
   "keywords": [
     "cli",
@@ -46,7 +48,7 @@
     "execa": "^9.5.3",
     "fs-extra": "^11.3.0",
     "gradient-string": "^3.0.0",
-    "inquirer": "^12.6.1",
+    "inquirer": "^8.2.4",
     "listr": "^0.14.3",
     "ora": "^8.2.0"
   }

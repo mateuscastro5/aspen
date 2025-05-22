@@ -6,13 +6,13 @@ import pkg from '../../package.json' with { type: 'json' };
 export const checkForUpdates = async (): Promise<void> => {
   try {
     const spinner = ora('Checking for updates...').start();
-    const { stdout } = await execa('npm', ['view', 'aspen', 'version']);
+    const { stdout } = await execa('npm', ['view', 'aspen-backend-cli', 'version']);
     const latestVersion = stdout.trim();
     const currentVersion = pkg.version;
     
     if (latestVersion !== currentVersion) {
       spinner.succeed(`Update available ${chalk.dim(currentVersion)} → ${chalk.green(latestVersion)}`);
-      console.log(`Run ${chalk.cyan('npm install -g aspen')} to update.`);
+      console.log(`Run ${chalk.cyan('npm install -g aspen-backend-cli')} to update.`);
     } else {
       spinner.succeed(`You are using the latest version of Aspen (${chalk.green(currentVersion)})`);
     }
