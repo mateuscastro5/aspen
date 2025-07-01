@@ -16,15 +16,23 @@ import { ProjectOptions } from '../types/index.js';
 export const createProject = async (name?: string, options?: { directory?: string, template?: string }) => {
   let projectName = name || '';
   if (!projectName) {
-    const answers = await inquirer.prompt([
-      {
-        type: 'input',
-        name: 'projectName',
-        message: 'What is the name of your project?',
-        validate: validateProjectName
+    try {
+      const answers = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'projectName',
+          message: 'What is the name of your project?',
+          validate: validateProjectName
+        }
+      ]);
+      projectName = answers.projectName;
+    } catch (error: any) {
+      if (error?.name === 'ExitPromptError') {
+        console.log(chalk.yellow('\nOperation cancelled by user.'));
+        process.exit(0);
       }
-    ]);
-    projectName = answers.projectName;
+      throw error;
+    }
   }
 
   const projectOptions = await promptForProjectOptions(projectName, options);
@@ -33,18 +41,26 @@ export const createProject = async (name?: string, options?: { directory?: strin
   
   const isEmpty = await checkDirectory(outputDir);
   if (!isEmpty) {
-    const { proceed } = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'proceed',
-        message: `Directory ${chalk.cyan(outputDir)} is not empty. Do you want to proceed?`,
-        default: false
+    try {
+      const { proceed } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'proceed',
+          message: `Directory ${chalk.cyan(outputDir)} is not empty. Do you want to proceed?`,
+          default: false
+        }
+      ]);
+      
+      if (!proceed) {
+        console.log(chalk.yellow('Operation cancelled'));
+        return;
       }
-    ]);
-    
-    if (!proceed) {
-      console.log(chalk.yellow('Operation cancelled'));
-      return;
+    } catch (error: any) {
+      if (error?.name === 'ExitPromptError') {
+        console.log(chalk.yellow('\nOperation cancelled by user.'));
+        return;
+      }
+      throw error;
     }
   }
   
@@ -57,36 +73,33 @@ const promptForProjectOptions = async (
   name: string, 
   cliOptions?: { directory?: string, template?: string }
 ): Promise<ProjectOptions> => {
-  const { language } = await inquirer.prompt([
-    {
-      type: 'list',
-      name: 'language',
-      message: 'Select the programming language:',
-      choices: templates.map(t => ({
-        name: `${t.name} - ${t.description}`,
-        value: t.name
-      }))
+  try {
+    const { language } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'language',
+        message: 'Select the programming language:',
+        choices: templates.map(t => ({
+          name: `${t.name} - ${t.description}`,
+          value: t.name
+        }))
+      }
+    ]);
+    
+    const selectedTemplate = templates.find(t => t.name === language);
+    if (!selectedTemplate) {
+      throw new Error(`Template '${language}' not found`);
     }
-  ]);
-  
-  const selectedTemplate = templates.find(t => t.name === language);
-  if (!selectedTemplate) {
-    throw new Error(`Template '${language}' not found`);
-  }
   
   const { framework } = await inquirer.prompt([
     {
       type: 'list',
       name: 'framework',
       message: 'Select a framework:',
-      choices: [
-        ...selectedTemplate.frameworks.map(f => ({
-          name: `${f.name} - ${f.description}`,
-          value: f.name
-        })),
-        { name: 'hono - Ultrafast web framework for the Edges', value: 'hono' },
-        { name: 'adonisjs - Full-stack framework with a focus on developer ergonomics', value: 'adonisjs' }
-      ]
+      choices: selectedTemplate.frameworks.map(f => ({
+        name: `${f.name} - ${f.description}`,
+        value: f.name
+      }))
     }
   ]);
   
@@ -198,6 +211,13 @@ const promptForProjectOptions = async (
     features: selectedFeatures,
     packageManager
   };
+  } catch (error: any) {
+    if (error?.name === 'ExitPromptError') {
+      console.log(chalk.yellow('\nOperation cancelled by user.'));
+      process.exit(0);
+    }
+    throw error;
+  }
 };
 
 const executeProjectCreation = async (outputDir: string, options: ProjectOptions) => {
@@ -521,7 +541,7 @@ const displaySuccessMessage = (outputDir: string, options: ProjectOptions) => {
   }
   
   console.log();
-  console.log(`To learn more about Aspen, visit: ${chalk.cyan('https://github.com/yourusername/aspen')}`);
+  console.log(`To learn more about Aspen, visit: ${chalk.cyan('https://github.com/mateuscastro5/aspen')}`);
   console.log();
 };
 
