@@ -80,14 +80,20 @@ export const frameworkCommands = {
   nestjs: {
     typescript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        await executeCommand('npx', ['@nestjs/cli', 'new', '.', '--package-manager', options.packageManager, '--skip-git', '--skip-install'], projectPath);
+        const projectName = path.basename(projectPath);
+        const parentDir = path.dirname(projectPath);
+        
+        await executeCommand('npx', ['@nestjs/cli', 'new', projectName, '--package-manager', options.packageManager, '--skip-git'], parentDir);
         
         return true;
       }
     },
     javascript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        await executeCommand('npx', ['@nestjs/cli', 'new', '.', '--package-manager', options.packageManager, '--skip-git', '--skip-install', '--language', 'javascript'], projectPath);
+        const projectName = path.basename(projectPath);
+        const parentDir = path.dirname(projectPath);
+        
+        await executeCommand('npx', ['@nestjs/cli', 'new', projectName, '--package-manager', options.packageManager, '--skip-git', '--language', 'javascript'], parentDir);
         
         return true;
       }
@@ -96,21 +102,20 @@ export const frameworkCommands = {
   hono: {
     typescript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        await executeCommand('npm', ['create', 'hono@latest', '.', '--ts'], projectPath);
+        const tempName = path.basename(projectPath);
+        const parentDir = path.dirname(projectPath);
         
-        await executeCommand('npm', ['install', 'dotenv'], projectPath);
-        
-        const srcDir = path.join(projectPath, 'src');
-        await fs.ensureDir(srcDir);
+        await executeCommand('npm', ['create', 'hono@latest', tempName, '--', '--template', 'nodejs'], parentDir);
         
         return true;
       }
     },
     javascript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        await executeCommand('npm', ['create', 'hono@latest', '.'], projectPath);
+        const tempName = path.basename(projectPath);
+        const parentDir = path.dirname(projectPath);
         
-        await executeCommand('npm', ['install', 'dotenv'], projectPath);
+        await executeCommand('npm', ['create', 'hono@latest', tempName], parentDir);
         
         return true;
       }
@@ -119,14 +124,14 @@ export const frameworkCommands = {
   adonisjs: {
     typescript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        await executeCommand('npm', ['init', 'adonisjs@latest', '.', '--', '--skip-install', '--skip-git'], projectPath);
+        await executeCommand('npm', ['init', 'adonisjs@latest', path.basename(projectPath)], path.dirname(projectPath));
         
         return true;
       }
     },
     javascript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        await executeCommand('npm', ['init', 'adonisjs@latest', '.', '--', '--skip-install', '--skip-git'], projectPath);
+        await executeCommand('npm', ['init', 'adonisjs@latest', path.basename(projectPath)], path.dirname(projectPath));
         
         return true;
       }
@@ -355,14 +360,23 @@ export const createProjectFromTemplate = async (projectPath: string, options: Pr
 
 export const executeCommand = async (command: string, args: string[], cwd: string) => {
   try {
-    await execa(command, args, {
+    console.log(`\n🔧 Executing: ${command} ${args.join(' ')}`);
+    
+    const result = await execa(command, args, {
       cwd,
-      stdio: 'pipe'
+      stdio: 'inherit'
     });
+    
+    console.log(`✅ Command completed successfully`);
     return true;
-  } catch (error) {
-    console.error(`Error executing command: ${command} ${args.join(' ')}`);
-    console.error(error);
-    return false;
+  } catch (error: any) {
+    console.error(`❌ Error executing command: ${command} ${args.join(' ')}`);
+    console.error(`Error details:`, error.message);
+    
+    if (error.code === 'ENOENT') {
+      console.error(`💡 Make sure ${command} is installed and available in PATH`);
+    }
+    
+    throw error;
   }
 };
