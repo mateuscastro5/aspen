@@ -74,6 +74,10 @@ const promptForProjectOptions = async (
   cliOptions?: { directory?: string, template?: string }
 ): Promise<ProjectOptions> => {
   try {
+    if (cliOptions?.template) {
+      return await createProjectOptionsFromTemplate(name, cliOptions);
+    }
+    
     const { language } = await inquirer.prompt([
       {
         type: 'list',
@@ -107,14 +111,7 @@ const promptForProjectOptions = async (
   
   let ormChoices;
   
-  if (framework === 'hono') {
-    ormChoices = [
-      { name: 'prisma - Next-generation ORM for Node.js and TypeScript', value: 'prisma' },
-      { name: 'drizzle - TypeScript ORM for Node.js', value: 'drizzle' },
-      { name: 'mongoose - MongoDB object modeling for Node.js', value: 'mongoose' },
-      { name: 'none - No ORM', value: 'none' }
-    ];
-  } else if (selectedFramework) {
+  if (selectedFramework) {
     ormChoices = selectedFramework.orms.map(o => ({
       name: `${o.name} - ${o.description}`,
       value: o.name
@@ -220,18 +217,54 @@ const promptForProjectOptions = async (
   }
 };
 
+const createProjectOptionsFromTemplate = async (
+  name: string,
+  cliOptions: { directory?: string, template?: string }
+): Promise<ProjectOptions> => {
+  const template = cliOptions.template!;
+  
+  const templateParts = template.split('-');
+  if (templateParts.length !== 2) {
+    throw new Error(`Invalid template format: ${template}. Use format: framework-language (e.g., fastify-typescript, express-typescript)`);
+  }
+  
+  const [framework, language] = templateParts;
+  
+  return {
+    name,
+    directory: cliOptions.directory,
+    template,
+    language: language as 'typescript' | 'javascript',
+    framework,
+    orm: 'none',
+    database: 'none',
+    features: ['dotenv', 'nodemon'],
+    packageManager: 'npm'
+  };
+};
+
 const executeProjectCreation = async (outputDir: string, options: ProjectOptions) => {
   const tasks = new Listr([
     {
       title: 'Creating project directory',
       task: async () => {
-        await createDirectory(outputDir);
+        if (['nestjs', 'adonisjs'].includes(options.framework)) {
+          console.log(`Preparing to use ${options.framework} CLI`);
+        } else {
+          await createDirectory(outputDir);
+        }
       }
     },
     {
       title: `Creating ${options.framework} project with ${options.language}`,
       task: async () => {
-        try {
+        if (['express', 'fastify'].includes(options.framework)) {
+          const success = await createProjectFromTemplate(outputDir, options);
+          if (!success) {
+            throw new Error(`Failed to create ${options.framework} project from template`);
+          }
+        } 
+        else if (['nestjs', 'adonisjs'].includes(options.framework)) {
           const frameworkCLI = frameworkCommands[options.framework as keyof typeof frameworkCommands];
           if (!frameworkCLI) {
             throw new Error(`Framework '${options.framework}' not supported`);
@@ -243,22 +276,11 @@ const executeProjectCreation = async (outputDir: string, options: ProjectOptions
           }
           
           const success = await languageCLI.create(outputDir, options);
-          
           if (!success) {
-            console.log(chalk.yellow(`Using template as fallback for ${options.framework} with ${options.language}`));
-            const fallbackSuccess = await createProjectFromTemplate(outputDir, options);
-            
-            if (!fallbackSuccess) {
-              throw new Error(`Failed to create ${options.framework} project with ${options.language}`);
-            }
+            throw new Error(`Failed to create ${options.framework} project using official CLI`);
           }
-        } catch (error) {
-          console.log(chalk.yellow(`Using template as fallback for ${options.framework} with ${options.language}`));
-          const fallbackSuccess = await createProjectFromTemplate(outputDir, options);
-          
-          if (!fallbackSuccess) {
-            throw new Error(`Failed to create ${options.framework} project with ${options.language}`);
-          }
+        } else {
+          throw new Error(`Framework '${options.framework}' not supported`);
         }
       }
     },
@@ -285,24 +307,30 @@ const executeProjectCreation = async (outputDir: string, options: ProjectOptions
     {
       title: 'Setting up project structure',
       task: async () => {
-        await fs.ensureDir(path.join(outputDir, 'src'));
-        await fs.ensureDir(path.join(outputDir, 'src/controllers'));
-        await fs.ensureDir(path.join(outputDir, 'src/models'));
-        await fs.ensureDir(path.join(outputDir, 'src/routes'));
-        await fs.ensureDir(path.join(outputDir, 'src/middlewares'));
-        await fs.ensureDir(path.join(outputDir, 'src/services'));
-        await fs.ensureDir(path.join(outputDir, 'src/utils'));
-        await fs.ensureDir(path.join(outputDir, 'src/config'));
-        
-        if (options.features.includes('jest')) {
-          await fs.ensureDir(path.join(outputDir, 'src/__tests__'));
+        if (['express', 'fastify'].includes(options.framework)) {
+          console.log(`Creating basic structure for ${options.framework}`);
+          await fs.ensureDir(path.join(outputDir, 'src'));
+          await fs.ensureDir(path.join(outputDir, 'src/controllers'));
+          await fs.ensureDir(path.join(outputDir, 'src/models'));
+          await fs.ensureDir(path.join(outputDir, 'src/routes'));
+          await fs.ensureDir(path.join(outputDir, 'src/middlewares'));
+          await fs.ensureDir(path.join(outputDir, 'src/services'));
+          await fs.ensureDir(path.join(outputDir, 'src/utils'));
+          await fs.ensureDir(path.join(outputDir, 'src/config'));
+          
+          if (options.features.includes('jest')) {
+            await fs.ensureDir(path.join(outputDir, 'src/__tests__'));
+          }
+          
+          console.log(`Basic structure for ${options.framework} comes from template`);
+        } else {
+          console.log(`Skipping basic structure creation for framework: ${options.framework}`);
         }
       }
     },
     {
       title: 'Creating configuration files',
       task: async () => {
-        // Create .env file
         if (options.features.includes('dotenv')) {
           const envContent = `# Environment Variables
 NODE_ENV=development

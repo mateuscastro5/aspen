@@ -153,45 +153,6 @@ export const templates: TemplateConfig[] = [
         ]
       },
       {
-        name: 'hono',
-        description: 'Ultrafast web framework for the Edges',
-        orms: [
-          {
-            name: 'prisma',
-            description: 'Next-generation ORM for Node.js and TypeScript',
-            databases: [
-              { name: 'postgresql', description: 'PostgreSQL database' },
-              { name: 'mysql', description: 'MySQL database' },
-              { name: 'sqlite', description: 'SQLite database' },
-              { name: 'mongodb', description: 'MongoDB database (via Prisma Data Proxy)' }
-            ]
-          },
-          {
-            name: 'drizzle',
-            description: 'TypeScript ORM for Node.js',
-            databases: [
-              { name: 'postgresql', description: 'PostgreSQL database' },
-              { name: 'mysql', description: 'MySQL database' },
-              { name: 'sqlite', description: 'SQLite database' }
-            ]
-          },
-          {
-            name: 'mongoose',
-            description: 'MongoDB object modeling for Node.js',
-            databases: [
-              { name: 'mongodb', description: 'MongoDB database' }
-            ]
-          },
-          {
-            name: 'none',
-            description: 'No ORM',
-            databases: [
-              { name: 'none', description: 'No database' }
-            ]
-          }
-        ]
-      },
-      {
         name: 'adonisjs',
         description: 'Full-stack framework with a focus on developer ergonomics and speed',
         orms: [
@@ -295,36 +256,6 @@ export const templates: TemplateConfig[] = [
               { name: 'postgresql', description: 'PostgreSQL database' },
               { name: 'mysql', description: 'MySQL database' },
               { name: 'sqlite', description: 'SQLite database' }
-            ]
-          },
-          {
-            name: 'none',
-            description: 'No ORM',
-            databases: [
-              { name: 'none', description: 'No database' }
-            ]
-          }
-        ]
-      },
-      {
-        name: 'hono',
-        description: 'Ultrafast web framework for the Edges',
-        orms: [
-          {
-            name: 'prisma',
-            description: 'Next-generation ORM for Node.js and TypeScript',
-            databases: [
-              { name: 'postgresql', description: 'PostgreSQL database' },
-              { name: 'mysql', description: 'MySQL database' },
-              { name: 'sqlite', description: 'SQLite database' },
-              { name: 'mongodb', description: 'MongoDB database (via Prisma Data Proxy)' }
-            ]
-          },
-          {
-            name: 'mongoose',
-            description: 'MongoDB object modeling for Node.js',
-            databases: [
-              { name: 'mongodb', description: 'MongoDB database' }
             ]
           },
           {

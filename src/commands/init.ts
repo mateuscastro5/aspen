@@ -28,7 +28,6 @@ export const initProject = async (options?: { template?: string }) => {
   if (dependencies.express) detectedFramework = 'express';
   if (dependencies.fastify) detectedFramework = 'fastify';
   if (dependencies['@nestjs/core']) detectedFramework = 'nestjs';
-  if (dependencies.hono) detectedFramework = 'hono';
   if (dependencies.adonis || dependencies['@adonisjs/core']) detectedFramework = 'adonisjs';
   
   let detectedORM = 'none';
@@ -57,7 +56,6 @@ export const initProject = async (options?: { template?: string }) => {
         { name: 'Express', value: 'express' },
         { name: 'Fastify', value: 'fastify' },
         { name: 'NestJS', value: 'nestjs' },
-        { name: 'Hono', value: 'hono' },
         { name: 'AdonisJS', value: 'adonisjs' },
         { name: 'Other', value: 'other' }
       ],

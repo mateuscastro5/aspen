@@ -19,12 +19,30 @@ export const copyTemplateFiles = async (sourceDir: string, targetDir: string, op
       }
     });
     
-    const packageJsonPath = path.join(targetDir, 'package.json');
-    if (await fs.pathExists(packageJsonPath)) {
-      const packageJson = await fs.readJson(packageJsonPath);
-      packageJson.name = options.name;
-      await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
-    }
+    const processEjsFiles = async (dir: string) => {
+      const files = await fs.readdir(dir);
+      
+      for (const file of files) {
+        const filePath = path.join(dir, file);
+        const stat = await fs.stat(filePath);
+        
+        if (stat.isDirectory()) {
+          await processEjsFiles(filePath);
+        } else if (file.endsWith('.ejs')) {
+          let content = await fs.readFile(filePath, 'utf-8');
+          
+          content = content.replace(/<%= projectName %>/g, options.name);
+          content = content.replace(/<%= description %>/g, `A ${options.framework} application`);
+          
+          const newFilePath = filePath.replace('.ejs', '');
+          await fs.writeFile(newFilePath, content);
+          
+          await fs.remove(filePath);
+        }
+      }
+    };
+    
+    await processEjsFiles(targetDir);
     
     spinner.succeed('Template files copied successfully');
     return true;
@@ -38,42 +56,24 @@ export const frameworkCommands = {
   express: {
     typescript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        await executeCommand('npm', ['init', '-y'], projectPath);
-        await executeCommand('npm', ['install', 'express', 'dotenv', 'cors', 'helmet'], projectPath);
-        await executeCommand('npm', ['install', '-D', 'typescript', '@types/node', '@types/express', '@types/cors', 'ts-node-dev', 'rimraf'], projectPath);
-        
-        await executeCommand('npx', ['tsc', '--init'], projectPath);
-        
-        return true;
+        return false;
       }
     },
     javascript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        await executeCommand('npm', ['init', '-y'], projectPath);
-        await executeCommand('npm', ['install', 'express', 'dotenv', 'cors', 'helmet'], projectPath);
-        
-        return true;
+        return false;
       }
     }
   },
   fastify: {
     typescript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        await executeCommand('npm', ['init', '-y'], projectPath);
-        await executeCommand('npm', ['install', 'fastify', 'dotenv', '@fastify/cors'], projectPath);
-        await executeCommand('npm', ['install', '-D', 'typescript', '@types/node', 'ts-node-dev', 'rimraf'], projectPath);
-        
-        await executeCommand('npx', ['tsc', '--init'], projectPath);
-        
-        return true;
+        return false;
       }
     },
     javascript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        await executeCommand('npm', ['init', '-y'], projectPath);
-        await executeCommand('npm', ['install', 'fastify', 'dotenv', '@fastify/cors'], projectPath);
-        
-        return true;
+        return false;
       }
     }
   },
@@ -83,9 +83,27 @@ export const frameworkCommands = {
         const projectName = path.basename(projectPath);
         const parentDir = path.dirname(projectPath);
         
-        await executeCommand('npx', ['@nestjs/cli', 'new', projectName, '--package-manager', options.packageManager, '--skip-git'], parentDir);
+        if (await fs.pathExists(projectPath)) {
+          await fs.remove(projectPath);
+        }
         
-        return true;
+        try {
+          await ensureCLIInstalled('NestJS CLI', '@nestjs/cli', 'nest');
+          
+          console.log('🏗️ Creating NestJS project...');
+          await executeCommand('nest', [
+            'new', 
+            projectName, 
+            '--package-manager', 
+            options.packageManager || 'npm',
+            '--skip-git'
+          ], parentDir, 300000, false);
+          
+          return true;
+        } catch (error) {
+          console.error('Failed to create NestJS project:', error);
+          throw new Error(`Failed to create NestJS project: ${error}`);
+        }
       }
     },
     javascript: {
@@ -93,47 +111,79 @@ export const frameworkCommands = {
         const projectName = path.basename(projectPath);
         const parentDir = path.dirname(projectPath);
         
-        await executeCommand('npx', ['@nestjs/cli', 'new', projectName, '--package-manager', options.packageManager, '--skip-git', '--language', 'javascript'], parentDir);
+        if (await fs.pathExists(projectPath)) {
+          await fs.remove(projectPath);
+        }
         
-        return true;
-      }
-    }
-  },
-  hono: {
-    typescript: {
-      create: async (projectPath: string, options: ProjectOptions) => {
-        const tempName = path.basename(projectPath);
-        const parentDir = path.dirname(projectPath);
-        
-        await executeCommand('npm', ['create', 'hono@latest', tempName, '--', '--template', 'nodejs'], parentDir);
-        
-        return true;
-      }
-    },
-    javascript: {
-      create: async (projectPath: string, options: ProjectOptions) => {
-        const tempName = path.basename(projectPath);
-        const parentDir = path.dirname(projectPath);
-        
-        await executeCommand('npm', ['create', 'hono@latest', tempName], parentDir);
-        
-        return true;
+        try {
+          await ensureCLIInstalled('NestJS CLI', '@nestjs/cli', 'nest');
+          
+          console.log('🏗️ Creating NestJS project...');
+          await executeCommand('nest', [
+            'new', 
+            projectName, 
+            '--package-manager', 
+            options.packageManager || 'npm',
+            '--skip-git',
+            '--language', 
+            'JS'
+          ], parentDir, 300000, false);
+          
+          return true;
+        } catch (error) {
+          console.error('Failed to create NestJS project:', error);
+          throw new Error(`Failed to create NestJS project: ${error}`);
+        }
       }
     }
   },
   adonisjs: {
     typescript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        await executeCommand('npm', ['init', 'adonisjs@latest', path.basename(projectPath)], path.dirname(projectPath));
+        const projectName = path.basename(projectPath);
+        const parentDir = path.dirname(projectPath);
         
-        return true;
+        if (await fs.pathExists(projectPath)) {
+          await fs.remove(projectPath);
+        }
+        
+        try {
+          console.log('🏗️ Creating AdonisJS project...');
+          await executeCommand('npm', [
+            'init', 
+            'adonisjs@latest', 
+            projectName
+          ], parentDir, 300000, false);
+          
+          return true;
+        } catch (error) {
+          console.error('Failed to create AdonisJS project:', error);
+          throw new Error(`Failed to create AdonisJS project: ${error}`);
+        }
       }
     },
     javascript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        await executeCommand('npm', ['init', 'adonisjs@latest', path.basename(projectPath)], path.dirname(projectPath));
+        const projectName = path.basename(projectPath);
+        const parentDir = path.dirname(projectPath);
         
-        return true;
+        if (await fs.pathExists(projectPath)) {
+          await fs.remove(projectPath);
+        }
+        
+        try {
+          console.log('🏗️ Creating AdonisJS project...');
+          await executeCommand('npm', [
+            'init', 
+            'adonisjs@latest', 
+            projectName
+          ], parentDir, 300000, false);
+          
+          return true;
+        } catch (error) {
+          console.error('Failed to create AdonisJS project:', error);
+          throw new Error(`Failed to create AdonisJS project: ${error}`);
+        }
       }
     }
   }
@@ -250,8 +300,6 @@ export const addFeatures = async (projectPath: string, options: ProjectOptions) 
         await executeCommand('npm', ['install', '@fastify/swagger'], projectPath);
       } else if (options.framework === 'nestjs') {
         await executeCommand('npm', ['install', '@nestjs/swagger'], projectPath);
-      } else if (options.framework === 'hono') {
-        await executeCommand('npm', ['install', '@hono/swagger-ui'], projectPath);
       }
     }
     
@@ -320,24 +368,17 @@ export const createProjectFromTemplate = async (projectPath: string, options: Pr
   try {
     let templateDir: string;
     
+    // Usar templates apenas para Express e Fastify (frameworks simples)
     if (options.framework === 'express' && options.language === 'typescript') {
       templateDir = path.resolve(__dirname, '../../templates/express-typescript');
     } else if (options.framework === 'fastify' && options.language === 'typescript') {
       templateDir = path.resolve(__dirname, '../../templates/fastify-typescript');
-    } else if (options.framework === 'hono' && options.language === 'typescript') {
-      await executeCommand('npm', ['init', '-y'], projectPath);
-      await executeCommand('npm', ['install', 'hono'], projectPath);
-      await executeCommand('npm', ['install', '-D', 'typescript', '@types/node', 'ts-node-dev'], projectPath);
-      await executeCommand('npx', ['tsc', '--init'], projectPath);
-      
-      const srcDir = path.join(projectPath, 'src');
-      await fs.ensureDir(srcDir);
-      
-      const indexContent = `import { Hono } from 'hono';\nimport { logger } from 'hono/logger';\nimport { cors } from 'hono/cors';\n\nconst app = new Hono();\n\n// Middleware\napp.use('*', logger());\napp.use('*', cors());\n\n// Routes\napp.get('/', (c) => c.json({ message: 'Hello Hono!' }));\napp.get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));\n\n// Start the server\nconst port = process.env.PORT || 3000;\nconsole.log(\`Server is running on port \${port}\`);\n\nexport default app;`;
-      await fs.writeFile(path.join(srcDir, 'index.ts'), indexContent);
-      
-      spinner.succeed(`Created Hono project manually`);
-      return true;
+    } else if (options.framework === 'express' && options.language === 'javascript') {
+      // Para JavaScript, usar template TypeScript como base e converter
+      templateDir = path.resolve(__dirname, '../../templates/express-typescript');
+    } else if (options.framework === 'fastify' && options.language === 'javascript') {
+      // Para JavaScript, usar template TypeScript como base e converter
+      templateDir = path.resolve(__dirname, '../../templates/fastify-typescript');
     } else {
       spinner.fail(`No template available for ${options.framework} with ${options.language}`);
       return false;
@@ -358,25 +399,54 @@ export const createProjectFromTemplate = async (projectPath: string, options: Pr
   }
 };
 
-export const executeCommand = async (command: string, args: string[], cwd: string) => {
+export const executeCommand = async (command: string, args: string[], cwd: string, timeoutMs: number = 300000, silent: boolean = true) => {
   try {
-    console.log(`\n🔧 Executing: ${command} ${args.join(' ')}`);
+    if (!silent) {
+      console.log(`\n🔧 Executing: ${command} ${args.join(' ')}`);
+      console.log(`📁 Working directory: ${cwd}`);
+    }
     
     const result = await execa(command, args, {
       cwd,
-      stdio: 'inherit'
+      stdio: silent ? 'pipe' : 'inherit',
+      timeout: timeoutMs
     });
     
-    console.log(`✅ Command completed successfully`);
+    if (!silent) {
+      console.log(`✅ Command completed successfully`);
+    }
     return true;
   } catch (error: any) {
+    if (error.timedOut) {
+      console.error(`⏰ Command timed out after ${timeoutMs / 1000} seconds`);
+    }
+    
     console.error(`❌ Error executing command: ${command} ${args.join(' ')}`);
-    console.error(`Error details:`, error.message);
+    console.error(`📁 Working directory: ${cwd}`);
+    console.error(`Exit code: ${error.exitCode}`);
+    
+    if (error.stdout) {
+      console.error(`📤 Stdout:`, error.stdout);
+    }
+    if (error.stderr) {
+      console.error(`📥 Stderr:`, error.stderr);
+    }
     
     if (error.code === 'ENOENT') {
       console.error(`💡 Make sure ${command} is installed and available in PATH`);
     }
     
     throw error;
+  }
+};
+
+const ensureCLIInstalled = async (cliName: string, packageName: string, checkCommand: string) => {
+  try {
+    await executeCommand(checkCommand, ['--version'], process.cwd(), 10000, true);
+    console.log(`✅ ${cliName} is already installed`);
+  } catch (error) {
+    console.log(`🔧 Installing ${cliName} globally...`);
+    await executeCommand('npm', ['install', '-g', packageName], process.cwd(), 120000, false);
+    console.log(`✅ ${cliName} installed successfully`);
   }
 };
