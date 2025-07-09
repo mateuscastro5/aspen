@@ -2,7 +2,6 @@
 
 A modern command-line tool for creating backend projects with customizable options and robust framework support.
 
-![Aspen CLI](https://i.imgur.com/YourAspenCLIScreenshot.png)
 
 ## Features
 
