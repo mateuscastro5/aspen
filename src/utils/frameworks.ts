@@ -12,7 +12,6 @@ const __dirname = path.dirname(__filename);
 export const copyTemplateFiles = async (sourceDir: string, targetDir: string, options: ProjectOptions): Promise<boolean> => {
   const spinner = ora('Copying template files').start();
   try {
-    // Primeiro, copiar todos os arquivos
     await fs.copy(sourceDir, targetDir, {
       overwrite: true,
       filter: (src) => {
@@ -20,7 +19,6 @@ export const copyTemplateFiles = async (sourceDir: string, targetDir: string, op
       }
     });
     
-    // Processar arquivos .ejs
     const processEjsFiles = async (dir: string) => {
       const files = await fs.readdir(dir);
       
@@ -31,18 +29,14 @@ export const copyTemplateFiles = async (sourceDir: string, targetDir: string, op
         if (stat.isDirectory()) {
           await processEjsFiles(filePath);
         } else if (file.endsWith('.ejs')) {
-          // Ler o conteúdo do arquivo .ejs
           let content = await fs.readFile(filePath, 'utf-8');
           
-          // Substituir variáveis EJS básicas
           content = content.replace(/<%= projectName %>/g, options.name);
           content = content.replace(/<%= description %>/g, `A ${options.framework} application`);
           
-          // Criar novo arquivo sem a extensão .ejs
           const newFilePath = filePath.replace('.ejs', '');
           await fs.writeFile(newFilePath, content);
           
-          // Remover o arquivo .ejs original
           await fs.remove(filePath);
         }
       }
@@ -62,13 +56,11 @@ export const frameworkCommands = {
   express: {
     typescript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        // Express sempre usa template local - não tem CLI oficial para scaffolding
         return false;
       }
     },
     javascript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        // Express sempre usa template local - não tem CLI oficial para scaffolding
         return false;
       }
     }
@@ -76,13 +68,11 @@ export const frameworkCommands = {
   fastify: {
     typescript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        // Fastify sempre usa template local - CLI oficial é muito básica
         return false;
       }
     },
     javascript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        // Fastify sempre usa template local - CLI oficial é muito básica
         return false;
       }
     }
@@ -93,22 +83,21 @@ export const frameworkCommands = {
         const projectName = path.basename(projectPath);
         const parentDir = path.dirname(projectPath);
         
-        // Primeiro, remover o diretório se ele já existir
         if (await fs.pathExists(projectPath)) {
           await fs.remove(projectPath);
         }
         
         try {
-          // Usar a CLI do NestJS diretamente
-          await executeCommand('npx', [
-            '@nestjs/cli@latest', 
+          await ensureCLIInstalled('NestJS CLI', '@nestjs/cli', 'nest');
+          
+          console.log('🏗️ Creating NestJS project...');
+          await executeCommand('nest', [
             'new', 
             projectName, 
             '--package-manager', 
             options.packageManager || 'npm',
-            '--skip-git',
-            '--strict'
-          ], parentDir, 300000, false); // 5 minutos de timeout, mostrar progresso
+            '--skip-git'
+          ], parentDir, 300000, false);
           
           return true;
         } catch (error) {
@@ -122,15 +111,15 @@ export const frameworkCommands = {
         const projectName = path.basename(projectPath);
         const parentDir = path.dirname(projectPath);
         
-        // Primeiro, remover o diretório se ele já existir
         if (await fs.pathExists(projectPath)) {
           await fs.remove(projectPath);
         }
         
         try {
-          // Usar a CLI do NestJS diretamente
-          await executeCommand('npx', [
-            '@nestjs/cli@latest', 
+          await ensureCLIInstalled('NestJS CLI', '@nestjs/cli', 'nest');
+          
+          console.log('🏗️ Creating NestJS project...');
+          await executeCommand('nest', [
             'new', 
             projectName, 
             '--package-manager', 
@@ -138,7 +127,7 @@ export const frameworkCommands = {
             '--skip-git',
             '--language', 
             'JS'
-          ], parentDir, 300000, false); // 5 minutos de timeout, mostrar progresso
+          ], parentDir, 300000, false);
           
           return true;
         } catch (error) {
@@ -151,16 +140,50 @@ export const frameworkCommands = {
   adonisjs: {
     typescript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        await executeCommand('npm', ['init', 'adonisjs@latest', path.basename(projectPath)], path.dirname(projectPath));
+        const projectName = path.basename(projectPath);
+        const parentDir = path.dirname(projectPath);
         
-        return true;
+        if (await fs.pathExists(projectPath)) {
+          await fs.remove(projectPath);
+        }
+        
+        try {
+          console.log('🏗️ Creating AdonisJS project...');
+          await executeCommand('npm', [
+            'init', 
+            'adonisjs@latest', 
+            projectName
+          ], parentDir, 300000, false);
+          
+          return true;
+        } catch (error) {
+          console.error('Failed to create AdonisJS project:', error);
+          throw new Error(`Failed to create AdonisJS project: ${error}`);
+        }
       }
     },
     javascript: {
       create: async (projectPath: string, options: ProjectOptions) => {
-        await executeCommand('npm', ['init', 'adonisjs@latest', path.basename(projectPath)], path.dirname(projectPath));
+        const projectName = path.basename(projectPath);
+        const parentDir = path.dirname(projectPath);
         
-        return true;
+        if (await fs.pathExists(projectPath)) {
+          await fs.remove(projectPath);
+        }
+        
+        try {
+          console.log('🏗️ Creating AdonisJS project...');
+          await executeCommand('npm', [
+            'init', 
+            'adonisjs@latest', 
+            projectName
+          ], parentDir, 300000, false);
+          
+          return true;
+        } catch (error) {
+          console.error('Failed to create AdonisJS project:', error);
+          throw new Error(`Failed to create AdonisJS project: ${error}`);
+        }
       }
     }
   }
@@ -414,5 +437,16 @@ export const executeCommand = async (command: string, args: string[], cwd: strin
     }
     
     throw error;
+  }
+};
+
+const ensureCLIInstalled = async (cliName: string, packageName: string, checkCommand: string) => {
+  try {
+    await executeCommand(checkCommand, ['--version'], process.cwd(), 10000, true);
+    console.log(`✅ ${cliName} is already installed`);
+  } catch (error) {
+    console.log(`🔧 Installing ${cliName} globally...`);
+    await executeCommand('npm', ['install', '-g', packageName], process.cwd(), 120000, false);
+    console.log(`✅ ${cliName} installed successfully`);
   }
 };

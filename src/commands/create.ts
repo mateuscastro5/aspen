@@ -248,12 +248,9 @@ const executeProjectCreation = async (outputDir: string, options: ProjectOptions
     {
       title: 'Creating project directory',
       task: async () => {
-        // Para frameworks robustos (NestJS, AdonisJS), não criar o diretório antecipadamente
         if (['nestjs', 'adonisjs'].includes(options.framework)) {
-          // As CLIs oficiais criam o diretório automaticamente
           console.log(`Preparing to use ${options.framework} CLI`);
         } else {
-          // Para Express e Fastify, criar o diretório primeiro
           await createDirectory(outputDir);
         }
       }
