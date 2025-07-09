@@ -1,114 +1,152 @@
-# Aspen
+# Aspen CLI
 
-Aspen é uma ferramenta de linha de comando moderna para criar projetos backend com opções personalizáveis.
+A modern command-line tool for creating backend projects with customizable options and robust framework support.
 
 ![Aspen CLI](https://i.imgur.com/YourAspenCLIScreenshot.png)
 
-## Características
+## Features
 
-- 🚀 Criação rápida de projetos backend
-- 🛠️ Suporte para vários frameworks: Express, Fastify, NestJS, Hono, AdonisJS
-- 📊 Integração com diversos ORMs: Prisma, TypeORM, Mongoose, Drizzle, Sequelize, Lucid (AdonisJS)
-- 🗄️ Suporte para diferentes bancos de dados: PostgreSQL, MySQL, SQLite, MongoDB
-- 📦 Utiliza os CLIs nativos dos frameworks quando disponíveis
-- 🔧 Configuração personalizada de recursos adicionais
-- 🎨 Interface de linha de comando intuitiva e bonita
+- 🚀 Fast backend project creation
+- 🛠️ Support for multiple frameworks: Express, Fastify, NestJS, AdonisJS
+- 📊 Integration with various ORMs: Prisma, TypeORM, Mongoose, Drizzle, Sequelize, Lucid (AdonisJS)
+- 🗄️ Support for different databases: PostgreSQL, MySQL, SQLite, MongoDB
+- 📦 Uses native CLIs for robust frameworks (NestJS, AdonisJS) and local templates for simple frameworks (Express, Fastify)
+- 🔧 Customizable additional features and configurations
+- 🎨 Beautiful and intuitive command-line interface
+- ⚡ Automatic CLI installation for frameworks that require it
+- 🚫 No fallback to templates for frameworks with official CLIs
 
-## Instalação
+## Installation
 
 ```bash
-# Instalação global via npm
+# Global installation via npm
 npm install -g aspen-cli
 
-# Ou via yarn
+# Or via yarn
 yarn global add aspen-cli
 
-# Ou via pnpm
+# Or via pnpm
 pnpm add -g aspen-cli
 ```
 
-## Uso
+## Usage
 
-### Criar um novo projeto
+### Create a new project
 
 ```bash
-# Criar um novo projeto com assistente interativo
+# Create a new project with interactive wizard
 aspen create my-project
 
-# Criar um projeto especificando diretório
+# Create a project specifying directory
 aspen create my-project --directory ./projects
 
-# Criar um projeto com template específico
+# Create a project with specific template (for Express/Fastify)
 aspen create my-project --template express-typescript
 ```
 
-### Listar templates disponíveis
+### List available templates
 
 ```bash
 aspen list
 ```
 
-### Inicializar Aspen em um projeto existente
+### Initialize Aspen in an existing project
 
 ```bash
-# Navegue até o diretório do projeto existente
-cd meu-projeto-existente
+# Navigate to your existing project directory
+cd my-existing-project
 
-# Inicializar Aspen
+# Initialize Aspen
 aspen init
 ```
 
-```bash
-# Criar um novo projeto
-aspen create my-backend-project
+## Project Creation Options
 
-# Obter ajuda
-aspen --help
-```
+When creating a new project, you can customize:
 
-## Opções de Criação de Projeto
+- **Language**: TypeScript or JavaScript
+- **Framework**: Express, Fastify, NestJS, AdonisJS
+- **ORM**: Prisma, TypeORM, Mongoose, Drizzle, Sequelize, Lucid (AdonisJS) or none
+- **Database**: PostgreSQL, MySQL, SQLite, MongoDB or none
+- **Additional Features**:
+  - ESLint for code linting
+  - Prettier for code formatting
+  - Biome as an alternative formatter/linter
+  - Jest for testing
+  - Docker configuration
+  - Swagger/OpenAPI documentation
+  - JWT Authentication
+  - Rate limiting
+  - CORS support
+  - Helmet for security
+  - Winston for logging
+  - Husky for git hooks
+  - GitHub Actions for CI/CD
+  - And more...
 
-Ao criar um novo projeto, você pode personalizar:
+## Framework Strategies
 
-- **Linguagem**: TypeScript ou JavaScript
-- **Framework**: Express, Fastify, NestJS, Hono, AdonisJS
-- **ORM**: Prisma, TypeORM, Mongoose, Drizzle, Sequelize, Lucid (AdonisJS) ou nenhum
-- **Banco de Dados**: PostgreSQL, MySQL, SQLite, MongoDB ou nenhum
-- **Recursos Adicionais**:
-  - ESLint
-  - Prettier
-  - Biome
-  - Jest
-  - Docker
-  - Swagger/OpenAPI
-  - Autenticação JWT
-  - Limitação de taxa
-  - CORS
-  - Helmet
-  - Winston (logging)
-  - e mais...
+### Simple Frameworks (Express, Fastify)
+- Uses **complete local templates** with example files
+- Includes pre-configured project structure
+- Ready-to-use example controllers, services, and routes
+- Faster setup with immediate development readiness
 
-## Estrutura do Projeto Gerado
+### Robust Frameworks (NestJS, AdonisJS)
+- Uses **official CLIs only** - no fallback to templates
+- Automatically installs framework CLI if not present
+- Leverages the full power and latest features of official tooling
+- Ensures compatibility with framework best practices
 
+## Generated Project Structure
+
+### Express/Fastify Projects
 ```
 my-backend-project/
 ├── src/
-│   ├── controllers/     # Controladores da aplicação
-│   ├── models/          # Modelos de dados
-│   ├── routes/          # Definição de rotas
-│   ├── middlewares/     # Middlewares
-│   ├── services/        # Serviços da aplicação
-│   ├── utils/           # Utilitários
-│   ├── config/          # Configurações
-│   └── index.ts         # Ponto de entrada da aplicação
-├── .env                 # Variáveis de ambiente
-├── .env.example         # Exemplo de variáveis de ambiente
-├── .gitignore           # Arquivos ignorados pelo git
-├── package.json         # Dependências e scripts
-├── tsconfig.json        # Configuração do TypeScript (se aplicável)
-└── README.md            # Documentação
+│   ├── controllers/     # Application controllers with examples
+│   ├── models/          # Data models
+│   ├── routes/          # Route definitions
+│   ├── middlewares/     # Custom middlewares
+│   ├── services/        # Business logic services
+│   ├── utils/           # Utility functions
+│   ├── config/          # Configuration files
+│   └── index.ts         # Application entry point
+├── .env                 # Environment variables
+├── .env.example         # Environment variables example
+├── .gitignore           # Git ignore rules
+├── package.json         # Dependencies and scripts
+├── tsconfig.json        # TypeScript configuration
+├── Dockerfile           # Docker configuration (if selected)
+├── docker-compose.yml   # Docker Compose setup (if selected)
+└── README.md            # Project documentation
 ```
 
-## Licença
+### NestJS/AdonisJS Projects
+```
+my-backend-project/
+├── [Framework-specific structure created by official CLI]
+├── Additional ORM configuration (if selected)
+├── Additional features configuration (if selected)
+└── Environment and Docker setup (if selected)
+```
+
+## Why This Approach?
+
+- **Reliability**: Official CLIs are maintained by framework authors and always up-to-date
+- **Best Practices**: Framework CLIs ensure proper project structure and configuration
+- **No Maintenance Burden**: No need to maintain custom templates for complex frameworks
+- **Flexibility**: Simple frameworks get rich templates, complex frameworks get official tooling
+- **Performance**: Faster setup for simple projects, robust setup for complex projects
+
+## Contributing
+
+We welcome contributions! Please see our contributing guidelines for more information.
+
+## License
 
 MIT
+
+## Support
+
+If you encounter any issues or have questions/suggestions, please open an issue on our GitHub repository.
