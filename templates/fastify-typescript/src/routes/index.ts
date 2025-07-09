@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify';
+import { exampleHandlers } from '../controllers/example.controller.js';
 
 export const routes = async (fastify: FastifyInstance) => {
   // Health check route
@@ -22,6 +23,13 @@ export const routes = async (fastify: FastifyInstance) => {
       });
     }
   });
+
+  // Example CRUD routes
+  fastify.get('/examples', exampleHandlers.getAll);
+  fastify.get('/examples/:id', exampleHandlers.getById);
+  fastify.post('/examples', exampleHandlers.create);
+  fastify.put('/examples/:id', exampleHandlers.update);
+  fastify.delete('/examples/:id', exampleHandlers.remove);
 
   // Example route with params
   fastify.get('/hello/:name', {
