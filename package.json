@@ -1,6 +1,6 @@
 {
   "name": "cli-aspen",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A modern CLI tool for creating backend projects with customizable options",
   "main": "dist/index.js",
   "bin": {
