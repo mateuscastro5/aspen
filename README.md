@@ -49,16 +49,6 @@ aspen create my-project --template express-typescript
 aspen list
 ```
 
-### Initialize Aspen in an existing project
-
-```bash
-# Navigate to your existing project directory
-cd my-existing-project
-
-# Initialize Aspen
-aspen init
-```
-
 ## Project Creation Options
 
 When creating a new project, you can customize:
