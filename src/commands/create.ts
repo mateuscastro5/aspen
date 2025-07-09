@@ -8,7 +8,8 @@ import {
   validateProjectName, 
   resolveOutputDir, 
   checkDirectory,
-  createDirectory
+  createDirectory,
+  installProjectDependencies
 } from '../utils/index.js';
 import { frameworkCommands, addORM, addFeatures, createProjectFromTemplate } from '../utils/frameworks.js';
 import { ProjectOptions } from '../types/index.js';
@@ -546,6 +547,16 @@ ${options.features.includes('jest') ?
           console.error('Error updating package.json:', error);
         }
       }
+    },
+    {
+      title: `Installing dependencies with ${options.packageManager}`,
+      task: async () => {
+        // Only install dependencies for template-based projects (express, fastify)
+        // NestJS and AdonisJS handle their own dependency installation
+        if (['express', 'fastify'].includes(options.framework)) {
+          await installProjectDependencies(outputDir, options.packageManager);
+        }
+      }
     }
   ]);
   
@@ -559,8 +570,19 @@ const displaySuccessMessage = (outputDir: string, options: ProjectOptions) => {
   console.log(`${chalk.bold('Next steps:')}`);
   console.log(`  cd ${chalk.cyan(path.relative(process.cwd(), outputDir))}`);
   
-  const runCommand = options.packageManager === 'npm' ? 'npm run' : 
-                     options.packageManager === 'yarn' ? 'yarn' : 'pnpm';
+  let runCommand: string;
+  switch (options.packageManager) {
+    case 'yarn':
+      runCommand = 'yarn';
+      break;
+    case 'pnpm':
+      runCommand = 'pnpm run';
+      break;
+    case 'npm':
+    default:
+      runCommand = 'npm run';
+      break;
+  }
   
   console.log(`  ${chalk.cyan(`${runCommand} dev`)}`);
   

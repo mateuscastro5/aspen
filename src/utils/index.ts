@@ -82,18 +82,81 @@ export const copyTemplateFiles = async (sourceDir: string, targetDir: string, te
   }
 };
 
-export const installDependencies = async (dir: string, packageManager: string): Promise<void> => {
+export const checkPackageManagerAvailable = async (packageManager: string): Promise<boolean> => {
+  try {
+    await execa(packageManager, ['--version'], { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const ensurePackageManagerInstalled = async (packageManager: string): Promise<void> => {
+  const isAvailable = await checkPackageManagerAvailable(packageManager);
+  
+  if (!isAvailable && packageManager === 'yarn') {
+    const spinner = ora('Yarn not found. Installing Yarn globally...').start();
+    try {
+      await execa('npm', ['install', '-g', 'yarn'], { stdio: 'ignore' });
+      spinner.succeed('Yarn installed successfully');
+    } catch (error) {
+      spinner.fail('Failed to install Yarn. Please install it manually: npm install -g yarn');
+      throw error;
+    }
+  } else if (!isAvailable && packageManager === 'pnpm') {
+    const spinner = ora('pnpm not found. Installing pnpm globally...').start();
+    try {
+      await execa('npm', ['install', '-g', 'pnpm'], { stdio: 'ignore' });
+      spinner.succeed('pnpm installed successfully');
+    } catch (error) {
+      spinner.fail('Failed to install pnpm. Please install it manually: npm install -g pnpm');
+      throw error;
+    }
+  } else if (!isAvailable) {
+    throw new Error(`Package manager '${packageManager}' is not available and cannot be auto-installed`);
+  }
+};
+
+export const installProjectDependencies = async (dir: string, packageManager: string): Promise<void> => {
+  await ensurePackageManagerInstalled(packageManager);
+  
   const spinner = ora(`Installing dependencies with ${chalk.cyan(packageManager)}`).start();
   try {
     const command = packageManager;
-    const args = packageManager === 'yarn' ? [] : ['install'];
+    let args: string[];
+    
+    switch (packageManager) {
+      case 'yarn':
+        args = ['install'];
+        break;
+      case 'pnpm':
+        args = ['install'];
+        break;
+      case 'npm':
+      default:
+        args = ['install'];
+        break;
+    }
     
     await execa(command, args, {
       cwd: dir,
       stdio: 'ignore'
     });
     
-    spinner.succeed('Dependencies installed successfully');
+    spinner.succeed(`Dependencies installed successfully with ${packageManager}`);
+    
+    const lockFiles = {
+      npm: 'package-lock.json',
+      yarn: 'yarn.lock',
+      pnpm: 'pnpm-lock.yaml'
+    };
+    
+    const lockFile = lockFiles[packageManager as keyof typeof lockFiles] || 'package-lock.json';
+    const lockFilePath = path.join(dir, lockFile);
+    
+    if (await fs.pathExists(lockFilePath)) {
+      console.log(chalk.green(`✓ Generated ${lockFile}`));
+    }
   } catch (error) {
     spinner.fail('Failed to install dependencies');
     throw error;
