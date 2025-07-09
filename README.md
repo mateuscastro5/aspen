@@ -148,4 +148,4 @@ MIT
 
 ## Support
 
-If you encounter any issues or have questions/suggestions, please open an issue on our GitHub repository.
+If you encounter any issues or have questions/suggestions, please open an issue on our GitHub repository or let me know by any means.
