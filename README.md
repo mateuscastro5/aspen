@@ -1,6 +1,11 @@
 # Aspen CLI
 
+[![npm version](https://img.shields.io/npm/v/cli-aspen.svg)](https://www.npmjs.com/package/cli-aspen)
+[![npm downloads](https://img.shields.io/npm/dt/cli-aspen.svg)](https://www.npmjs.com/package/cli-aspen)
+
 A modern command-line tool for creating backend projects with customizable options and robust framework support.
+
+Available on npm: [cli-aspen](https://www.npmjs.com/package/cli-aspen)
 
 
 ## Features
@@ -19,13 +24,13 @@ A modern command-line tool for creating backend projects with customizable optio
 
 ```bash
 # Global installation via npm
-npm install -g aspen-cli
+npm install -g cli-aspen
 
 # Or via yarn
-yarn global add aspen-cli
+yarn global add cli-aspen
 
 # Or via pnpm
-pnpm add -g aspen-cli
+pnpm add -g cli-aspen
 ```
 
 ## Usage
