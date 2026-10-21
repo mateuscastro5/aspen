@@ -3,144 +3,88 @@
 [![npm version](https://img.shields.io/npm/v/cli-aspen.svg)](https://www.npmjs.com/package/cli-aspen)
 [![npm downloads](https://img.shields.io/npm/dt/cli-aspen.svg)](https://www.npmjs.com/package/cli-aspen)
 
-A modern command-line tool for creating backend projects with customizable options and robust framework support.
+Create TypeScript backend projects that build, lint and pass their tests from the first minute.
 
 Available on npm: [cli-aspen](https://www.npmjs.com/package/cli-aspen)
 
+## Why Aspen
 
-## Features
-
-- 🚀 Fast backend project creation
-- 🛠️ Support for multiple frameworks: Express, Fastify, NestJS, AdonisJS
-- 📊 Integration with various ORMs: Prisma, TypeORM, Mongoose, Drizzle, Sequelize, Lucid (AdonisJS)
-- 🗄️ Support for different databases: PostgreSQL, MySQL, SQLite, MongoDB
-- 📦 Uses native CLIs for robust frameworks (NestJS, AdonisJS) and local templates for simple frameworks (Express, Fastify)
-- 🔧 Customizable additional features and configurations
-- 🎨 Beautiful and intuitive command-line interface
-- ⚡ Automatic CLI installation for frameworks that require it
-- 🚫 No fallback to templates for frameworks with official CLIs
+- **Small, tested surface.** A short list of frameworks, ORMs and databases, and every combination is generated and verified in CI.
+- **Works with or without prompts.** Answer a few questions, or pass everything as flags. Scripts and AI agents can use `--json` to get a machine-readable result.
+- **Current versions.** Express 5, Fastify 5, NestJS 12, Prisma 7, Drizzle, ESLint 10 and Vitest.
 
 ## Installation
 
 ```bash
-# Global installation via npm
 npm install -g cli-aspen
+```
 
-# Or via yarn
-yarn global add cli-aspen
+Or run it without installing:
 
-# Or via pnpm
-pnpm add -g cli-aspen
+```bash
+npx cli-aspen create my-api
 ```
 
 ## Usage
 
-### Create a new project
+Interactive:
 
 ```bash
-# Create a new project with interactive wizard
-aspen create my-project
-
-# Create a project specifying directory
-aspen create my-project --directory ./projects
-
-# Create a project with specific template (for Express/Fastify)
-aspen create my-project --template express-typescript
+aspen create my-api
 ```
 
-### List available templates
+Without prompts:
 
 ```bash
-aspen list
+aspen create my-api --framework fastify --orm drizzle --database postgresql --yes
 ```
 
-## Project Creation Options
+For scripts and AI agents:
 
-When creating a new project, you can customize:
-
-- **Language**: TypeScript or JavaScript
-- **Framework**: Express, Fastify, NestJS, AdonisJS
-- **ORM**: Prisma, TypeORM, Mongoose, Drizzle, Sequelize, Lucid (AdonisJS) or none
-- **Database**: PostgreSQL, MySQL, SQLite, MongoDB or none
-- **Additional Features**:
-  - ESLint for code linting
-  - Prettier for code formatting
-  - Biome as an alternative formatter/linter
-  - Jest for testing
-  - Docker configuration
-  - Swagger/OpenAPI documentation
-  - JWT Authentication
-  - Rate limiting
-  - CORS support
-  - Helmet for security
-  - Winston for logging
-  - Husky for git hooks
-  - GitHub Actions for CI/CD
-  - And more...
-
-## Framework Strategies
-
-### Simple Frameworks (Express, Fastify)
-- Uses **complete local templates** with example files
-- Includes pre-configured project structure
-- Ready-to-use example controllers, services, and routes
-- Faster setup with immediate development readiness
-
-### Robust Frameworks (NestJS, AdonisJS)
-- Uses **official CLIs only** - no fallback to templates
-- Automatically installs framework CLI if not present
-- Leverages the full power and latest features of official tooling
-- Ensures compatibility with framework best practices
-
-## Generated Project Structure
-
-### Express/Fastify Projects
-```
-my-backend-project/
-├── src/
-│   ├── controllers/     # Application controllers with examples
-│   ├── models/          # Data models
-│   ├── routes/          # Route definitions
-│   ├── middlewares/     # Custom middlewares
-│   ├── services/        # Business logic services
-│   ├── utils/           # Utility functions
-│   ├── config/          # Configuration files
-│   └── index.ts         # Application entry point
-├── .env                 # Environment variables
-├── .env.example         # Environment variables example
-├── .gitignore           # Git ignore rules
-├── package.json         # Dependencies and scripts
-├── tsconfig.json        # TypeScript configuration
-├── Dockerfile           # Docker configuration (if selected)
-├── docker-compose.yml   # Docker Compose setup (if selected)
-└── README.md            # Project documentation
+```bash
+aspen create my-api --framework nestjs --orm prisma --database sqlite --json
+aspen list --json
 ```
 
-### NestJS/AdonisJS Projects
+### Options
+
+| Flag | Values | Default |
+|---|---|---|
+| `-f, --framework` | `express`, `fastify`, `nestjs` | `express` |
+| `-o, --orm` | `prisma`, `drizzle`, `none` | `none` |
+| `--database` | `postgresql`, `sqlite` (requires an ORM) | `postgresql` when an ORM is chosen |
+| `--features` | comma-separated list of `docker`, `lint`, `test`, `swagger`, `cors`, `helmet`, or `none` | all |
+| `-p, --package-manager` | `npm`, `pnpm` | `npm` |
+| `-d, --directory` | parent directory for the project | current directory |
+| `-y, --yes` | use defaults for anything not provided, without prompts | |
+| `--no-install` | skip installing dependencies | |
+| `--json` | print the result as JSON (implies `--yes`) | |
+
+## What you get
+
+| | Express / Fastify | NestJS |
+|---|---|---|
+| Base project | Aspen template: `app.ts` + `index.ts`, routes, an example service and a health check | Official `@nestjs/cli` project |
+| `lint` | ESLint 10 + typescript-eslint + Prettier | Included by NestJS (oxlint + Prettier) |
+| `test` | Vitest with example tests | Included by NestJS (Vitest) |
+| `swagger` | Swagger UI at `/docs` | `@nestjs/swagger` at `/docs` |
+| `cors`, `helmet` | Registered in `app.ts` | Registered in `main.ts` |
+| `docker` | Multi-stage `Dockerfile`, `docker-compose.yml` with PostgreSQL when selected | Same |
+
+With an ORM, the project also gets:
+
+- **Prisma**: `prisma/schema.prisma`, `prisma.config.ts` and a client in `src/db/client.ts` using the PostgreSQL or libSQL adapter.
+- **Drizzle**: `drizzle.config.ts`, `src/db/schema.ts` and a client in `src/db/client.ts` using `pg` or libSQL.
+- Scripts: `db:generate`, `db:migrate` and `db:studio`.
+
+## Development
+
+```bash
+npm install
+npm run build
+npm test
 ```
-my-backend-project/
-├── [Framework-specific structure created by official CLI]
-├── Additional ORM configuration (if selected)
-├── Additional features configuration (if selected)
-└── Environment and Docker setup (if selected)
-```
-
-## Why This Approach?
-
-- **Reliability**: Official CLIs are maintained by framework authors and always up-to-date
-- **Best Practices**: Framework CLIs ensure proper project structure and configuration
-- **No Maintenance Burden**: No need to maintain custom templates for complex frameworks
-- **Flexibility**: Simple frameworks get rich templates, complex frameworks get official tooling
-- **Performance**: Faster setup for simple projects, robust setup for complex projects
-
-## Contributing
-
-We welcome contributions! Please see our contributing guidelines for more information.
 
 ## License
 
 MIT
-
-## Support
-
-If you encounter any issues or have questions/suggestions, please open an issue on our GitHub repository or let me know by any means.

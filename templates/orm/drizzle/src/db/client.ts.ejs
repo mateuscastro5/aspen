@@ -1,0 +1,11 @@
+<% if (options.database === 'sqlite') { -%>
+import { drizzle } from 'drizzle-orm/libsql';
+import * as schema from './schema<%= ext %>';
+
+export const db = drizzle({ connection: { url: process.env.DATABASE_URL ?? 'file:./dev.db' }, schema });
+<% } else { -%>
+import { drizzle } from 'drizzle-orm/node-postgres';
+import * as schema from './schema<%= ext %>';
+
+export const db = drizzle(process.env.DATABASE_URL!, { schema });
+<% } -%>

@@ -1,0 +1,19 @@
+<% if (options.database === 'sqlite') { -%>
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+
+export const examples = sqliteTable('examples', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+<% } else { -%>
+import { pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+
+export const examples = pgTable('examples', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+<% } -%>

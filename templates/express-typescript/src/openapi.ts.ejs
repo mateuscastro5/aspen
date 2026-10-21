@@ -1,0 +1,26 @@
+<% if (has('swagger')) { -%>
+export const openApiDocument = {
+  openapi: '3.1.0',
+  info: { title: '<%= options.name %>', version: '0.1.0' },
+  paths: {
+    '/health': {
+      get: { summary: 'Health check', responses: { '200': { description: 'Service is up' } } },
+    },
+    '/examples': {
+      get: { summary: 'List examples', responses: { '200': { description: 'List of examples' } } },
+      post: {
+        summary: 'Create an example',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] },
+            },
+          },
+        },
+        responses: { '201': { description: 'Created' }, '400': { description: 'Invalid input' } },
+      },
+    },
+  },
+};
+<% } -%>

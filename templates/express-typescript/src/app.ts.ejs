@@ -1,0 +1,29 @@
+import express from 'express';
+<% if (has('cors')) { -%>
+import cors from 'cors';
+<% } -%>
+<% if (has('helmet')) { -%>
+import helmet from 'helmet';
+<% } -%>
+<% if (has('swagger')) { -%>
+import swaggerUi from 'swagger-ui-express';
+import { openApiDocument } from './openapi.js';
+<% } -%>
+import { routes } from './routes/index.js';
+import { errorHandler } from './middlewares/error-handler.js';
+
+export const app = express();
+
+<% if (has('helmet')) { -%>
+app.use(helmet());
+<% } -%>
+<% if (has('cors')) { -%>
+app.use(cors());
+<% } -%>
+app.use(express.json());
+
+<% if (has('swagger')) { -%>
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
+<% } -%>
+app.use(routes);
+app.use(errorHandler);
