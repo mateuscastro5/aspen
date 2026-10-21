@@ -1,10 +1,20 @@
 <% if (has('test')) { -%>
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from './app.js';
 
 describe('app', () => {
+  let app: Awaited<ReturnType<typeof buildApp>>;
+
+  beforeAll(async () => {
+    app = await buildApp({ logger: false });
+    await app.ready();
+  }, 30000);
+
+  afterAll(async () => {
+    await app.close();
+  });
+
   it('responds to the health check', async () => {
-    const app = await buildApp({ logger: false });
     const response = await app.inject({ method: 'GET', url: '/health' });
 
     expect(response.statusCode).toBe(200);
@@ -12,7 +22,6 @@ describe('app', () => {
   });
 
   it('creates an example', async () => {
-    const app = await buildApp({ logger: false });
     const response = await app.inject({ method: 'POST', url: '/examples', payload: { name: 'first' } });
 
     expect(response.statusCode).toBe(201);
@@ -20,7 +29,6 @@ describe('app', () => {
   });
 
   it('rejects an example without a name', async () => {
-    const app = await buildApp({ logger: false });
     const response = await app.inject({ method: 'POST', url: '/examples', payload: {} });
 
     expect(response.statusCode).toBe(400);
