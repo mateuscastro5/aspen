@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install
+      - run: npm run build
+      - run: npm run lint
+      - run: npm test
+
+  generated-projects:
+    needs: unit
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        framework: [express, fastify, nestjs]
+        stack:
+          - { orm: none, database: none }
+          - { orm: prisma, database: postgresql }
+          - { orm: prisma, database: sqlite }
+          - { orm: drizzle, database: postgresql }
+          - { orm: drizzle, database: sqlite }
+        pm: [npm]
+        include:
+          - { framework: express, stack: { orm: drizzle, database: postgresql }, pm: pnpm }
+          - { framework: fastify, stack: { orm: prisma, database: sqlite }, pm: pnpm }
+          - { framework: nestjs, stack: { orm: none, database: none }, pm: pnpm }
+    name: ${{ matrix.framework }} · ${{ matrix.stack.orm }} · ${{ matrix.stack.database }} · ${{ matrix.pm }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: npm install
+      - run: npm run build
+      - run: node e2e/verify.mjs
+        env:
+          FRAMEWORK: ${{ matrix.framework }}
+          ORM: ${{ matrix.stack.orm }}
+          DATABASE: ${{ matrix.stack.database }}
+          PM: ${{ matrix.pm }}
