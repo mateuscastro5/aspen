@@ -101,6 +101,18 @@ describe('generateProject', () => {
     const { read } = await generate({ packageManager: 'pnpm' });
 
     expect(await read('Dockerfile')).toContain('pnpm install --frozen-lockfile');
+    expect(await read('Dockerfile')).toContain('pnpm-workspace.yaml');
+  });
+
+  it('allows the build scripts pnpm needs and blocks telemetry', async () => {
+    const pnpm = await generate({ packageManager: 'pnpm', orm: 'prisma', database: 'sqlite' });
+    const npm = await generate({ packageManager: 'npm' });
+
+    const workspace = await pnpm.read('pnpm-workspace.yaml');
+    expect(workspace).toContain('esbuild: true');
+    expect(workspace).toContain("'@prisma/engines': true");
+    expect(workspace).toContain("'@scarf/scarf': false");
+    expect(await npm.exists('pnpm-workspace.yaml')).toBe(false);
   });
 
   it('refuses to write into a non-empty directory', async () => {

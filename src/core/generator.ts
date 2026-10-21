@@ -162,11 +162,24 @@ const writeEnvFiles = async (dir: string, options: ProjectOptions) => {
   await fs.writeFile(path.join(dir, '.env.example'), content);
 };
 
+const writePnpmWorkspace = async (dir: string) => {
+  const file = path.join(dir, 'pnpm-workspace.yaml');
+  if (await fs.pathExists(file)) {
+    return;
+  }
+  await fs.writeFile(file, `allowBuilds:
+  esbuild: true
+  prisma: true
+  '@prisma/engines': true
+  '@scarf/scarf': false
+`);
+};
+
 const writeDockerFiles = async (dir: string, options: ProjectOptions) => {
   const npm = options.packageManager === 'npm';
   const dockerfile = `FROM node:24-alpine AS build
 WORKDIR /app
-${npm ? '' : 'RUN corepack enable\n'}COPY package.json ${npm ? 'package-lock.json' : 'pnpm-lock.yaml'} ./
+${npm ? '' : 'RUN corepack enable\n'}COPY package.json ${npm ? 'package-lock.json' : 'pnpm-lock.yaml pnpm-workspace.yaml'} ./
 RUN ${npm ? 'npm ci' : 'pnpm install --frozen-lockfile'}
 COPY . .
 RUN ${npm ? 'npm run build' : 'pnpm build'}
@@ -242,6 +255,9 @@ export const generateProject = async (options: ProjectOptions, settings: Generat
     await addOrmFiles(dir, options);
     await writePackageJson(dir, options);
     await writeEnvFiles(dir, options);
+    if (options.packageManager === 'pnpm') {
+      await writePnpmWorkspace(dir);
+    }
     if (options.features.includes('docker')) {
       await writeDockerFiles(dir, options);
     }
