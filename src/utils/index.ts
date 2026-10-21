@@ -94,16 +94,7 @@ export const checkPackageManagerAvailable = async (packageManager: string): Prom
 export const ensurePackageManagerInstalled = async (packageManager: string): Promise<void> => {
   const isAvailable = await checkPackageManagerAvailable(packageManager);
   
-  if (!isAvailable && packageManager === 'yarn') {
-    const spinner = ora('Yarn not found. Installing Yarn globally...').start();
-    try {
-      await execa('npm', ['install', '-g', 'yarn'], { stdio: 'ignore' });
-      spinner.succeed('Yarn installed successfully');
-    } catch (error) {
-      spinner.fail('Failed to install Yarn. Please install it manually: npm install -g yarn');
-      throw error;
-    }
-  } else if (!isAvailable && packageManager === 'pnpm') {
+  if (!isAvailable && packageManager === 'pnpm') {
     const spinner = ora('pnpm not found. Installing pnpm globally...').start();
     try {
       await execa('npm', ['install', '-g', 'pnpm'], { stdio: 'ignore' });
@@ -123,21 +114,8 @@ export const installProjectDependencies = async (dir: string, packageManager: st
   const spinner = ora(`Installing dependencies with ${chalk.cyan(packageManager)}`).start();
   try {
     const command = packageManager;
-    let args: string[];
-    
-    switch (packageManager) {
-      case 'yarn':
-        args = ['install'];
-        break;
-      case 'pnpm':
-        args = ['install'];
-        break;
-      case 'npm':
-      default:
-        args = ['install'];
-        break;
-    }
-    
+    const args = ['install'];
+
     await execa(command, args, {
       cwd: dir,
       stdio: 'ignore'
@@ -147,7 +125,6 @@ export const installProjectDependencies = async (dir: string, packageManager: st
     
     const lockFiles = {
       npm: 'package-lock.json',
-      yarn: 'yarn.lock',
       pnpm: 'pnpm-lock.yaml'
     };
     
