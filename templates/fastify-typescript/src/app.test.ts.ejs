@@ -1,0 +1,29 @@
+<% if (has('test')) { -%>
+import { describe, expect, it } from 'vitest';
+import { buildApp } from './app.js';
+
+describe('app', () => {
+  it('responds to the health check', async () => {
+    const app = await buildApp({ logger: false });
+    const response = await app.inject({ method: 'GET', url: '/health' });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ status: 'ok' });
+  });
+
+  it('creates an example', async () => {
+    const app = await buildApp({ logger: false });
+    const response = await app.inject({ method: 'POST', url: '/examples', payload: { name: 'first' } });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.json().name).toBe('first');
+  });
+
+  it('rejects an example without a name', async () => {
+    const app = await buildApp({ logger: false });
+    const response = await app.inject({ method: 'POST', url: '/examples', payload: {} });
+
+    expect(response.statusCode).toBe(400);
+  });
+});
+<% } -%>

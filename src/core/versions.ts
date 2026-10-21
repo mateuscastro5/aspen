@@ -12,7 +12,7 @@ export const versions = {
   'swagger-ui-express': '^5.0.1',
   '@types/swagger-ui-express': '^4.1.8',
   supertest: '^7.3.1',
-  '@types/supertest': '^6.0.3',
+  '@types/supertest': '^7.2.1',
 
   fastify: '^5.12.7',
   '@fastify/cors': '^11.3.1',
@@ -22,6 +22,7 @@ export const versions = {
 
   '@nestjs/cli': '12.0.10',
   '@nestjs/swagger': '^12.0.2',
+  vite: '^8.3.5',
 
   prisma: '^7.10.1',
   '@prisma/client': '^7.10.1',

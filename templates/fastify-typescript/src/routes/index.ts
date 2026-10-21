@@ -1,59 +1,25 @@
-import { FastifyInstance } from 'fastify';
-import { exampleHandlers } from '../controllers/example.controller.js';
+import type { FastifyInstance } from 'fastify';
+import { exampleService } from '../services/example.service.js';
 
-export const routes = async (fastify: FastifyInstance) => {
-  // Health check route
-  fastify.get('/health', {
-    schema: {
-      description: 'Health check endpoint',
-      response: {
-        200: {
+export const routes = async (app: FastifyInstance) => {
+  app.get('/health', async () => ({ status: 'ok' }));
+
+  app.get('/examples', async () => exampleService.list());
+
+  app.post<{ Body: { name: string } }>(
+    '/examples',
+    {
+      schema: {
+        body: {
           type: 'object',
-          properties: {
-            status: { type: 'string' },
-            timestamp: { type: 'string', format: 'date-time' }
-          }
-        }
-      }
-    },
-    handler: async (request, reply) => {
-      return reply.send({
-        status: 'ok',
-        timestamp: new Date().toISOString()
-      });
-    }
-  });
-
-  // Example CRUD routes
-  fastify.get('/examples', exampleHandlers.getAll);
-  fastify.get('/examples/:id', exampleHandlers.getById);
-  fastify.post('/examples', exampleHandlers.create);
-  fastify.put('/examples/:id', exampleHandlers.update);
-  fastify.delete('/examples/:id', exampleHandlers.remove);
-
-  // Example route with params
-  fastify.get('/hello/:name', {
-    schema: {
-      description: 'Say hello to a user',
-      params: {
-        type: 'object',
-        required: ['name'],
-        properties: {
-          name: { type: 'string', description: 'User name' }
-        }
+          required: ['name'],
+          properties: { name: { type: 'string', minLength: 1 } },
+        },
       },
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            hello: { type: 'string' }
-          }
-        }
-      }
     },
-    handler: async (request, reply) => {
-      const { name } = request.params as { name: string };
-      return reply.send({ hello: name });
+    async (request, reply) => {
+      reply.code(201);
+      return exampleService.create(request.body.name.trim());
     }
-  });
+  );
 };

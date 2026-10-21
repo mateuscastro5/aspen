@@ -1,7 +1,7 @@
 {
   "name": "cli-aspen",
   "version": "0.1.4",
-  "description": "A modern CLI tool for creating backend projects with customizable options",
+  "description": "Create TypeScript backend projects (Express, Fastify, NestJS) with Prisma or Drizzle, ready to build, lint and test",
   "main": "dist/index.js",
   "bin": {
     "aspen": "dist/index.js"
@@ -14,7 +14,6 @@
     "lint": "eslint src --ext .ts",
     "prepublishOnly": "npm run build",
     "aspen": "node dist/index.js",
-    "publish-package": "./scripts/publish.sh",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "keywords": [
@@ -22,10 +21,14 @@
     "scaffold",
     "backend",
     "generator",
-    "project",
-    "template"
+    "typescript",
+    "express",
+    "fastify",
+    "nestjs",
+    "prisma",
+    "drizzle"
   ],
-  "author": "",
+  "author": "Mateus Fagundes",
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^9.30.1",
@@ -48,5 +51,20 @@
     "gradient-string": "^3.0.0",
     "inquirer": "^9.2.23",
     "ora": "^8.2.0"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mateuscastro5/aspen.git"
+  },
+  "homepage": "https://github.com/mateuscastro5/aspen#readme",
+  "bugs": {
+    "url": "https://github.com/mateuscastro5/aspen/issues"
   }
 }

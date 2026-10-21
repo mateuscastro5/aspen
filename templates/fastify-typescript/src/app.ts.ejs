@@ -1,0 +1,32 @@
+import Fastify from 'fastify';
+<% if (has('cors')) { -%>
+import cors from '@fastify/cors';
+<% } -%>
+<% if (has('helmet')) { -%>
+import helmet from '@fastify/helmet';
+<% } -%>
+<% if (has('swagger')) { -%>
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
+<% } -%>
+import { routes } from './routes/index.js';
+
+export const buildApp = async (options: { logger?: boolean } = {}) => {
+  const app = Fastify({ logger: options.logger ?? true });
+
+<% if (has('helmet')) { -%>
+  await app.register(helmet);
+<% } -%>
+<% if (has('cors')) { -%>
+  await app.register(cors);
+<% } -%>
+<% if (has('swagger')) { -%>
+  await app.register(swagger, {
+    openapi: { info: { title: '<%= options.name %>', version: '0.1.0' } },
+  });
+  await app.register(swaggerUi, { routePrefix: '/docs' });
+<% } -%>
+  await app.register(routes);
+
+  return app;
+};

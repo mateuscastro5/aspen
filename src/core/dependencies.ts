@@ -39,6 +39,8 @@ export const getDependencyPlan = (options: ProjectOptions): DependencyPlan => {
   }
 
   if (options.framework === 'nestjs') {
+    deps.push('dotenv');
+    devDeps.push('vite');
     if (has('helmet')) deps.push('helmet');
     if (has('swagger')) deps.push('@nestjs/swagger');
   }

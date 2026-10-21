@@ -51,13 +51,14 @@ const run = async (command: string, args: string[], cwd: string) => {
 const renderTemplate = async (sourceDir: string, targetDir: string, options: ProjectOptions) => {
   const data = {
     options,
-    has: (feature: Feature) => options.features.includes(feature)
+    has: (feature: Feature) => options.features.includes(feature),
+    ext: '.js'
   };
 
   const entries = await fs.readdir(sourceDir, { withFileTypes: true });
   for (const entry of entries) {
     const sourcePath = path.join(sourceDir, entry.name);
-    const targetName = entry.name.replace(/\.ejs$/, '');
+    const targetName = entry.name.replace(/\.ejs$/, '').replace(/^_gitignore$/, '.gitignore');
     const targetPath = path.join(targetDir, targetName);
 
     if (entry.isDirectory()) {
@@ -80,6 +81,7 @@ const scaffoldFromTemplate = async (dir: string, options: ProjectOptions) => {
     throw new GenerationError(`No template available for ${options.framework}`);
   }
   await fs.ensureDir(dir);
+  await renderTemplate(path.join(templatesDir, 'shared'), dir, options);
   await renderTemplate(templateDir, dir, options);
 };
 
@@ -95,6 +97,23 @@ const scaffoldNest = async (dir: string, options: ProjectOptions) => {
     '--skip-git',
     '--skip-install'
   ], path.dirname(dir));
+  await renderTemplate(path.join(templatesDir, 'nestjs'), dir, options);
+};
+
+const addOrmFiles = async (dir: string, options: ProjectOptions) => {
+  if (options.orm !== 'none') {
+    await renderTemplate(path.join(templatesDir, 'orm', options.orm), dir, options);
+  }
+};
+
+const ormScripts = (options: ProjectOptions): Record<string, string> => {
+  if (options.orm === 'prisma') {
+    return { 'db:generate': 'prisma generate', 'db:migrate': 'prisma migrate dev', 'db:studio': 'prisma studio' };
+  }
+  if (options.orm === 'drizzle') {
+    return { 'db:generate': 'drizzle-kit generate', 'db:migrate': 'drizzle-kit migrate', 'db:studio': 'drizzle-kit studio' };
+  }
+  return {};
 };
 
 const writePackageJson = async (dir: string, options: ProjectOptions) => {
@@ -104,18 +123,26 @@ const writePackageJson = async (dir: string, options: ProjectOptions) => {
 
   packageJson.name = options.name;
 
+  const prismaGenerate = options.orm === 'prisma' ? 'prisma generate && ' : '';
+
   if (options.framework === 'nestjs') {
     packageJson.dependencies = { ...packageJson.dependencies, ...plan.dependencies };
     packageJson.devDependencies = { ...packageJson.devDependencies, ...plan.devDependencies };
+    packageJson.scripts = {
+      ...packageJson.scripts,
+      build: `${prismaGenerate}${packageJson.scripts?.build ?? 'nest build'}`,
+      ...ormScripts(options)
+    };
   } else {
     packageJson.dependencies = plan.dependencies;
     packageJson.devDependencies = plan.devDependencies;
     packageJson.scripts = {
-      build: 'tsc',
+      build: `${prismaGenerate}tsc`,
       dev: 'tsx watch src/index.ts',
       start: 'node dist/index.js',
       ...(options.features.includes('lint') && { lint: 'eslint src', format: 'prettier --write src' }),
-      ...(options.features.includes('test') && { test: 'vitest run' })
+      ...(options.features.includes('test') && { test: 'vitest run' }),
+      ...ormScripts(options)
     };
   }
 
@@ -212,6 +239,7 @@ export const generateProject = async (options: ProjectOptions, settings: Generat
   );
 
   await logger.step('Writing dependencies and configuration', async () => {
+    await addOrmFiles(dir, options);
     await writePackageJson(dir, options);
     await writeEnvFiles(dir, options);
     if (options.features.includes('docker')) {
