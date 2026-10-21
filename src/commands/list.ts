@@ -9,7 +9,12 @@ const printGroup = <T extends string>(title: string, choices: Choice<T>[]) => {
   });
 };
 
-export const listTemplates = () => {
+export const listTemplates = (flags: { json?: boolean } = {}) => {
+  if (flags.json) {
+    process.stdout.write(`${JSON.stringify({ frameworks, orms, databases, features, packageManagers }, null, 2)}\n`);
+    return;
+  }
+
   printGroup('Frameworks', frameworks);
   printGroup('ORMs', orms);
   printGroup('Databases', databases);
@@ -18,6 +23,7 @@ export const listTemplates = () => {
 
   console.log('\nCreate a project with:');
   console.log(`  ${chalk.cyan('aspen create my-api')}`);
+  console.log(`  ${chalk.cyan('aspen create my-api --framework fastify --orm drizzle --database postgresql --yes')}`);
   console.log();
 };
 

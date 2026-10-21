@@ -1,48 +1,36 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import gradient from 'gradient-string';
 import { createProject } from './commands/create.js';
 import { listTemplates } from './commands/list.js';
 import pkg from '../package.json' with { type: 'json' };
 
-const version = pkg.version;
-
-const aspenGradient = gradient(['#2ecc71', '#3498db', '#9b59b6']);
-
 const program = new Command();
-
-console.log(aspenGradient.multiline(`
-     /\\      
-    /  \\     ███████╗██████╗ ███████╗███╗   ██╗
-   /    \\    ██╔════╝██╔══██╗██╔════╝████╗  ██║
-  /      \\   ███████╗██████╔╝█████╗  ██╔██╗ ██║
- /        \\  ╚════██║██╔═══╝ ██╔══╝  ██║╚██╗██║
-/          \\ ███████║██║     ███████╗██║ ╚████║
-────────────╚══════╝╚═╝     ╚══════╝╚═╝  ╚═══╝
-                                                
-  🌲 Modern Backend Project Scaffolding Tool 🌲
-`));
 
 program
   .name('aspen')
   .description('A modern CLI tool for creating backend projects')
-  .version(version);
+  .version(pkg.version);
 
 program
   .command('create')
   .description('Create a new backend project')
   .argument('[name]', 'Name of the project')
-  .option('-d, --directory <directory>', 'Directory to create the project in')
-  .option('-t, --template <template>', 'Template to use')
+  .option('-f, --framework <framework>', 'express, fastify or nestjs')
+  .option('-o, --orm <orm>', 'prisma, drizzle or none')
+  .option('--database <database>', 'postgresql or sqlite (requires an ORM)')
+  .option('--features <features>', 'comma-separated: docker,lint,test,swagger,cors,helmet (or "none")')
+  .option('-p, --package-manager <packageManager>', 'npm or pnpm')
+  .option('-d, --directory <directory>', 'Parent directory for the project')
+  .option('-t, --template <template>', 'Legacy shortcut, e.g. express-typescript')
+  .option('-y, --yes', 'Use defaults for anything not provided, without prompts')
+  .option('--no-install', 'Skip installing dependencies')
+  .option('--json', 'Machine-readable output (implies --yes)')
   .action(createProject);
 
 program
   .command('list')
-  .description('List available templates and frameworks')
+  .description('List supported frameworks, ORMs, databases and features')
+  .option('--json', 'Machine-readable output')
   .action(listTemplates);
 
 program.parse(process.argv);
-
-if (!process.argv.slice(2).length) {
-  program.outputHelp();
-}
